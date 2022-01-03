@@ -75,6 +75,23 @@ namespace DAM.Models
       cmd.ExecuteNonQuery();
     }
     // update
+    // public void update(string tableName, object obj) {
+    //   string updateString = "";
+    //   string key_value = "";
+    //   foreach (PropertyInfo prop in obj.GetType().GetProperties())
+    //   {
+    //     Console.WriteLine(prop.PropertyType.Name);
+    //     keys += prop.Name + ", ";
+    //     if (prop.PropertyType.Name == "String") {
+    //       values += "'" + prop.GetValue(obj, null) + "'" + ", ";
+    //     } else if (prop.PropertyType.Name == "DateTime") {
+    //       values += "'" + ((DateTime)prop.GetValue(obj, null)).ToString("yyyy-MM-dd H:mm:ss") + "'" + ", ";
+    //     } 
+    //     else {
+    //       values += prop.GetValue(obj, null) + ", ";
+    //     }
+    //   }
+    // }
     // query
     public List<Dictionary<string, dynamic>> getAll(string tableName)
     {
