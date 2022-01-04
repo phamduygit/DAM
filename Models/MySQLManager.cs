@@ -9,7 +9,23 @@ namespace DAM.Models
   {
     private string stringConnection { get; set; }
     private MySqlConnection connection { get; set; }
-
+    private string getValueProp(PropertyInfo prop, Object obj)
+    {
+      string result = "";
+      if (prop.PropertyType.Name == "String")
+      {
+        result += "'" + prop.GetValue(obj, null) + "'";
+      }
+      else if (prop.PropertyType.Name == "DateTime")
+      {
+        result += "'" + ((DateTime)prop.GetValue(obj, null)).ToString("yyyy-MM-dd H:mm:ss") + "'";
+      }
+      else
+      {
+        result += prop.GetValue(obj, null);
+      }
+      return result;
+    }
     // connect
     public bool connect(string stringConection)
     {
@@ -29,7 +45,8 @@ namespace DAM.Models
     }
     // insert
     // string Query = "insert into student.studentinfo(idStudentInfo,Name,Father_Name,Age,Semester) values('" + this.IdTextBox.Text + "','" + this.NameTextBox.Text + "','" + this.FnameTextBox.Text + "','" + this.AgeTextBox.Text + "','" + this.SemesterTextBox.Text + "');";
-    public void insert(string tableName, object obj) {
+    public void insert(string tableName, object obj)
+    {
       // crreate insert string
       string keys = "";
       string values = "";
@@ -37,14 +54,7 @@ namespace DAM.Models
       {
         Console.WriteLine(prop.PropertyType.Name);
         keys += prop.Name + ", ";
-        if (prop.PropertyType.Name == "String") {
-          values += "'" + prop.GetValue(obj, null) + "'" + ", ";
-        } else if (prop.PropertyType.Name == "DateTime") {
-          values += "'" + ((DateTime)prop.GetValue(obj, null)).ToString("yyyy-MM-dd H:mm:ss") + "'" + ", ";
-        } 
-        else {
-          values += prop.GetValue(obj, null) + ", ";
-        }
+        values += getValueProp(prop, obj) + ", ";
       }
       keys = keys.Remove(keys.Length - 2, 2);
       values = values.Remove(values.Length - 2, 2);
@@ -57,7 +67,8 @@ namespace DAM.Models
       cmd.ExecuteNonQuery();
     }
     // delete
-    public void delete(string tableName, object obj) {
+    public void delete(string tableName, object obj)
+    {
       // create delete string
       string key = "";
       string value = "";
@@ -75,23 +86,31 @@ namespace DAM.Models
       cmd.ExecuteNonQuery();
     }
     // update
-    // public void update(string tableName, object obj) {
-    //   string updateString = "";
-    //   string key_value = "";
-    //   foreach (PropertyInfo prop in obj.GetType().GetProperties())
-    //   {
-    //     Console.WriteLine(prop.PropertyType.Name);
-    //     keys += prop.Name + ", ";
-    //     if (prop.PropertyType.Name == "String") {
-    //       values += "'" + prop.GetValue(obj, null) + "'" + ", ";
-    //     } else if (prop.PropertyType.Name == "DateTime") {
-    //       values += "'" + ((DateTime)prop.GetValue(obj, null)).ToString("yyyy-MM-dd H:mm:ss") + "'" + ", ";
-    //     } 
-    //     else {
-    //       values += prop.GetValue(obj, null) + ", ";
-    //     }
-    //   }
-    // }
+    public void update(string tableName, object obj)
+    {
+      string updateString = "";
+      string key_value = "";
+      string condition = "";
+      foreach (PropertyInfo prop in obj.GetType().GetProperties())
+      {
+        if (condition == "")
+        {
+          condition = prop.Name + "=" + getValueProp(prop, obj) + ", ";
+        }
+        else
+        {
+          key_value += prop.Name + "=" + getValueProp(prop, obj) + ", ";
+        }
+      }
+      key_value = key_value.Remove(key_value.Length - 2, 2);
+      condition = condition.Remove(condition.Length - 2, 2);
+      updateString = $"update {tableName} set {key_value} where {condition}";
+      Console.WriteLine(updateString);
+      var cmd = new MySqlCommand();
+      cmd.CommandText = updateString;
+      cmd.Connection = connection;
+      cmd.ExecuteNonQuery();
+    }
     // query
     public List<Dictionary<string, dynamic>> getAll(string tableName)
     {

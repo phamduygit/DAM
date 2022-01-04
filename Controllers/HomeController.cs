@@ -30,7 +30,7 @@ namespace DAM.Controllers
       Customer onePerson = new Customer();
       onePerson.first_name = "a";
       onePerson.last_name = "b";
-      onePerson.city = "c";
+      onePerson.city = "Vietnam";
       onePerson.customer_id = 15;
       onePerson.birth_date = new DateTime(2015, 12, 25); 
       onePerson.points = 2;
@@ -40,6 +40,9 @@ namespace DAM.Controllers
       
       MySQLManager db = new MySQLManager();
       db.connect("Server=localhost;Uid=root;Pwd=minhduy999*;Database=sql_store;");
+      // db.insert("customers", onePerson);
+      // db.delete("customers", onePerson);
+      db.update("customers", onePerson);
       var maps = db.getAll("customers");
       foreach (Dictionary<string, dynamic> row in maps)
       {
@@ -49,10 +52,10 @@ namespace DAM.Controllers
         customer.last_name = row["last_name"];
         customer.city = row["city"];
         customer.birth_date = row["birth_date"];
+        customer.points = row["points"];
         customers.Add(customer);
       }
-      // db.insert("customers", onePerson);
-      db.delete("customers", onePerson);
+      
       db.close();
       return View(customers);
     }
