@@ -39,7 +39,7 @@ namespace DAM.Controllers
       onePerson.phone = "123";
       
       MySQLManager db = new MySQLManager();
-      db.connect("Server=localhost;Uid=root;Pwd=minhduy999*;Database=sql_store;");
+      db.connect("Server=localhost;Uid=root;Pwd=minhduy999*;Database=store;");
       // db.insert("customers", onePerson);
       // db.delete("customers", onePerson);
       db.update("customers", onePerson);
