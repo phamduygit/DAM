@@ -1,7 +1,7 @@
 using System;
 namespace DAM.Models
 {
-  public class Customer
+  public class Customer : DBObject
   {
     public int customer_id { get; set; }
     public string first_name { get; set; }
