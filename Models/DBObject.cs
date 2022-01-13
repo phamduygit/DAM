@@ -6,6 +6,7 @@ namespace DAM.Models
     {
         protected static string tableName;
         protected static string primaryKey;
+        protected static List<string> collumnNames {get ; set;}
         public void setTableName(string _tableName)
         {
             tableName = _tableName;
