@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using DAM.Models;
 using MySql.Data.MySqlClient;
-using System.Dynamic;
-using System.Reflection;
 
 namespace DAM.Controllers
 {
@@ -24,42 +22,54 @@ namespace DAM.Controllers
     }
     public IActionResult Index()
     {
-      //List<Customer> customers = new List<Customer>();
+      // List<Customer> customers = new List<Customer>();
+      // //starter
+      // //init db
+      // DBManager db = DBManagerSingleton.InitDBManager("mysql");
+      // //connect db
+      // db.Connect("Server=localhost;Uid=root;Pwd=minhduy999*;Database=store;");
+      // Customer onePerson = new Customer(customer_id: 16, first_name: "a", last_name: "b", city: "Vietnam", birth_date: new DateTime(2015, 12, 25), address: "abc", state: "hihi", points: 2, phone: "1234");
+      // Console.WriteLine("Ahihi");
+      // onePerson.customer_id = 20;
+      // onePerson.setTableName("customers");
+      // Console.WriteLine("Ahihi");
+      // onePerson.setPrimaryKey("");
+      // Console.WriteLine("Ahihi");
 
-      //starter
-      //init db
-      //DBManager db = DBManagerSingleton.InitDBManager("mysql");
+      // // Select toàn bộ bảng customers
+      // // ----------------------------
+      // var tableCustomers = db.Query("SELECT * FROM customers");
+      // // In tất cả các key của row 1
+      // foreach (KeyValuePair<string, dynamic> kvp in tableCustomers[0])
+      // {
+      //   Console.Write("{0} ", kvp.Key);
+      // }
+      // Console.WriteLine("");
+      // // In tất cả các value row 1
+      // foreach (KeyValuePair<string, dynamic> kvp in tableCustomers[0])
+      // {
+      //   Console.Write("{0} ", kvp.Value);
+      // }
+      // Console.WriteLine("");
 
-      //connect db
-      //db.Connect("Server=localhost;Uid=root;Pwd=;Database=sql_store;");
-      //Customer onePerson = new Customer();
-      //onePerson.first_name = "a";
-      //onePerson.last_name = "b";
-      //onePerson.city = "Vietnam";
-      //onePerson.customer_id = 136;
-      //onePerson.birth_date = new DateTime(2015, 12, 25);
-      //onePerson.points = 2;
-      //onePerson.state = "NA";
-      //onePerson.address = "d";
-      //onePerson.phone = "123";
-      //onePerson.setTableName("customers");
-      //onePerson.setPrimaryKey("")
-      //onePerson.save();
-      //db.update("customers", onePerson);
-      //var maps = db.getAll("customers");
-      //foreach (Dictionary<string, dynamic> row in maps)
-      //{
-      //  var customer = new Customer();
-      //  customer.customer_id = row["customer_id"];
-      //  customer.first_name = row["first_name"];
-      //  customer.last_name = row["last_name"];
-      //  customer.city = row["city"];
-      //  customer.birth_date = row["birth_date"];
-      //  customer.points = row["points"];
-      //  customers.Add(customer);
-      //}
-
-      //db.Close();
+      // // Select ID và ten vn bảng customers
+      // // ----------------------------
+      // var idAndName = db.Query("SELECT customer_id, first_name FROM customer");
+      // // In tất cả các key của row 1
+      // foreach (KeyValuePair<string, dynamic> kvp in idAndName[0])
+      // {
+      //   Console.Write("{0} ", kvp.Key);
+      // }
+      // Console.WriteLine("");
+      // // In tất cả các value row 1
+      // foreach (KeyValuePair<string, dynamic> kvp in idAndName[0])
+      // {
+      //   Console.Write("{0} ", kvp.Value);
+      // }
+      // Console.WriteLine("");
+      
+      // db.Close();
+      // return View(customers);
       return View();
     }
 

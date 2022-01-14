@@ -12,5 +12,16 @@ namespace DAM.Models
     public string state {get; set;}
     public string city { get; set; }
     public int points {get; set;}
+    public Customer(int customer_id, string first_name, string last_name, DateTime birth_date, string phone, string address, string state, string city, int points) {
+      this.customer_id = customer_id;
+      this.first_name = first_name;
+      this.last_name = last_name;
+      this.birth_date = birth_date;
+      this.phone = phone;
+      this.address = address;
+      this.state = state;
+      this.city = city;
+      this.points = points;
+    }
   }
 }
