@@ -4,7 +4,9 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using DAM.Models;
-using MySql.Data.MySqlClient;
+using System.Text.RegularExpressions;
+using System.ComponentModel;
+
 
 namespace DAM.Controllers
 {
@@ -87,32 +89,44 @@ namespace DAM.Controllers
     [HttpPost]
     public IActionResult Tables(DatabaseModel dbModel)
     {
-      //Console.WriteLine(dbModel.databaseType + " " + dbModel.connectionString + " " + dbModel.password);
+      //Console.WriteLine(dbModel.connectionString + "Pwd=" + dbModel.password);
       DBManager db = DBManagerSingleton.InitDBManager(dbModel.databaseType);
-
       db.Connect(dbModel.connectionString + "Pwd=" + dbModel.password);
-      //query
-      MySqlConnection connect = new MySqlConnection(dbModel.connectionString + "Pwd=" + dbModel.password);
-      connect.Open();
-      MySqlCommand cmd = new MySqlCommand("SHOW TABLES", connect);
+
       List<string> tableList = new List<string>();
-      MySqlDataReader reader = cmd.ExecuteReader();
+      var tables = db.Query("SHOW TABLES");
 
-      while (reader.Read())
+      foreach (var table in tables)
       {
-        tableList.Add(reader.GetString(0));
+          foreach (KeyValuePair<string, dynamic>  item in table)
+          {
+            tableList.Add(item.Value);
+          }
       }
-
-      reader.Close();
+       
       return View(tableList);
     }
 
-    public IActionResult Handle(Customer customer)
+    public IActionResult Handle()
     {
       string tableName = this.RouteData.Values["id"].ToString();
-      //DBManager db = DBManagerSingleton.InitDBManager("mysql");
-      //db.Connect("Server=localhost;Uid=root;Pwd=;Database=sql_store;");
-      //db.Query("DESCRIBE customers");
+
+      // Get class name from table name. Ex: customers => Customer
+      string className = Regex.Replace(tableName, @"(?<!\w)\w", m => m.Value.ToUpper()).Remove(tableName.Length - 1, 1);
+
+      // Get all column name of table
+      DBManager db = MySqLManager.GetInstance();
+      var cols = db.Query("DESCRIBE " + tableName);
+      List<string> colNames = new List<string>();
+
+      foreach (var col in cols)
+      {
+        foreach (KeyValuePair<string, dynamic> colName  in col)
+        {
+          colNames.Add(colName.Value);
+          break;
+        }
+      }
       
       if (Request.HasFormContentType) {
         switch (Request.Form["handle"])
@@ -122,42 +136,41 @@ namespace DAM.Controllers
             break;
           case "Insert": 
             Console.WriteLine("Insert");
+
+            Type t = Type.GetType("DAM.Models." + className);
+            object obj = Activator.CreateInstance(t);
+          
+            foreach (var colName in colNames)
+            {  
+              TypeConverter typeConverter = TypeDescriptor.GetConverter(obj.GetType().GetProperty(colName).PropertyType);
+
+              if (Request.Form[colName] != "") {
+                obj.GetType().GetProperty(colName).SetValue(obj, typeConverter.ConvertFromString(Request.Form[colName]));
+              }
+            }
+
+            var type = obj.GetType();
+            // Set tableName
+            var methodInfo = type.GetMethod("setTableName");
+            methodInfo.Invoke(obj, new object[]{tableName});
+
+            // Insert with savve method
+            methodInfo = type.GetMethod("save");
+            methodInfo.Invoke(obj, null);
             break;
           default:   
             Console.WriteLine("Invalid");
             break;
         }
       }
-      
-      MySqlConnection connect = new MySqlConnection("Server=localhost;Uid=root;Pwd=;Database=sql_store;");
-      connect.Open();
 
-      var maps = new List<Dictionary<string, dynamic>>();
-      var colNames = new List<string>();
-      MySqlCommand cmd = new MySqlCommand("select * from " + tableName, connect);
-      MySqlCommand cmdReadCol = new MySqlCommand("DESCRIBE " + tableName, connect);
-      MySqlDataReader reader = cmdReadCol.ExecuteReader();
-      while (reader.Read())
-      {
-          colNames.Add(reader.GetString(0));
-      }
-      reader.Close();
-      reader = cmd.ExecuteReader();
-      while (reader.Read())
-      {
-        var map = new Dictionary<string, dynamic>();
-        for (int i = 0; i < colNames.Count; i++)
-        {
-            map[colNames[i].ToString()] = reader[colNames[i]];
-        }
-        maps.Add(map);
-      }
+      var tableData = db.Query("SELECT * FROM " + tableName);
 
-      reader.Close();
-      ViewBag.ColNames = colNames;
-      ViewBag.Data = maps;
+      ViewBag.tableName = tableName;
+      ViewBag.colNames = colNames;
+      ViewBag.Data = tableData;
 
-      return View("customers", ViewBag);
+      return View("TableInfo", ViewBag);
     }
   }
 }

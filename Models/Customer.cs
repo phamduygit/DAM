@@ -23,5 +23,7 @@ namespace DAM.Models
       this.city = city;
       this.points = points;
     }
+
+    public Customer(){}
   }
 }
