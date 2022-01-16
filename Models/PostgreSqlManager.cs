@@ -70,12 +70,10 @@ namespace DAM.Models
       }
       keys = keys.Remove(keys.Length - 2, 2);
       values = values.Remove(values.Length - 2, 2);
-      // execute  
+      // execute  '
       string insertString = $"INSERT INTO {tableName}({keys}) VALUES({values})";
       Console.WriteLine(insertString);
-      var cmd = new NpgsqlCommand();
-      cmd.CommandText = insertString;
-      cmd.Connection = connection;
+      var cmd = new NpgsqlCommand(insertString,connection);
       cmd.ExecuteNonQuery();
       return true;
     }

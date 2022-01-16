@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -44,16 +44,19 @@ namespace DAM.Controllers
     {
       //Console.WriteLine(dbModel.connectionString + "Pwd=" + dbModel.password);
       DBManager db = DBManagerSingleton.InitDBManager(dbModel.databaseType);
-      db.Connect(dbModel.connectionString + "Pwd=" + dbModel.password);
+      db.Connect("Server=localhost;Port=5432;Database=dam;UserId=postgres;Password=admin;");
 
       List<string> tableList = new List<string>();
-      var tables = db.Query("SHOW TABLES");
+      var tables = db.Query("SELECT table_name FROM information_schema.tables");
 
       foreach (var table in tables)
       {
           foreach (KeyValuePair<string, dynamic>  item in table)
           {
+          if (!item.Value.Contains("pg_"))
+          {
             tableList.Add(item.Value);
+          }
           }
       }
        
@@ -69,15 +72,18 @@ namespace DAM.Controllers
 
       // Get all column name of table
       DBManager db = MySqLManager.GetInstance();
-      var cols = db.Query("DESCRIBE " + tableName);
+      var cols = db.Query($"SELECT column_name FROM information_schema.columns WHERE table_name='{tableName}'");
+      Console.WriteLine(cols);
       List<string> colNames = new List<string>();
 
       foreach (var col in cols)
       {
         foreach (KeyValuePair<string, dynamic> colName  in col)
         {
-          colNames.Add(colName.Value);
-          break;
+      
+            colNames.Add(colName.Value);
+            break;
+          
         }
       }
       
