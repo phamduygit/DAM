@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 namespace DAM.Models
 {
@@ -17,17 +17,17 @@ namespace DAM.Models
     public class DBManagerSingleton
     {
         private static DBManager _instance;
-        public static DBManager InitDBManager(String type)
-        {
-            if (type == "mysql")
-            {
-                _instance = MySqLManager.GetInstance();
-            }
-            //else if(type == 'postgreSql'
-            //    {
-            //        _instance =  PostGreSqlManager.GetInstance();
-            //    }
-            return _instance;
+    public static DBManager InitDBManager(String type)
+    {
+      if (type == "mysql")
+      {
+        _instance = MySqLManager.GetInstance();
+      } else if (type == "postgresql") {
+
+        _instance = PostgreSqlManager.GetInstance();
+      } 
+        
+      return _instance;
         }
         public static DBManager GetInstance()
         {
