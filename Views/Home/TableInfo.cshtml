@@ -1,0 +1,156 @@
+@using DAM.Models
+@using System.Reflection;
+@model dynamic
+
+@{
+	ViewData["Title"] = "Table Infomation";
+}
+
+<div class="container">
+	<div class="row align-items-center">
+		<div class="col-sm">
+			<h1>@ViewData["Title"]</h1>
+		</div>
+		<div class="col-sm text-right">
+			<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#insertModal">
+				Insert
+			</button>
+				<button type="button" class="btn btn-info" data-toggle="modal" data-target="#updateModal">
+				Update
+				<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">
+					Delete
+			</button>
+			<button class="p-10 btn btn-secondary" class type="button"   onclick="location.href = '@(Url.Action("CloseConnection", "Home"))'">
+				Close connection
+			</button>
+		</div>
+	</div>
+</div>
+
+@* Insert modal *@
+<div class="modal fade" id="insertModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="insertModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<form method="post" action="/Home/Handle/@ViewBag.tableName" class="m-2 p-3 bg-light">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="insertModalLabel">Insert</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+					@foreach (string colName in ViewBag.ColNames)
+					{
+							<div class="form-group">
+								<label for=@colName class="col-form-label text-right">
+								@colName
+								</label>
+								<input type="text" class="form-control" id=@colName name=@colName>
+							</div>
+					}
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<input class="btn btn-primary" type="submit" name="handle" value="Insert" />
+			</div>
+		</div>
+		</form>
+	</div>
+</div>
+
+@* Update modal *@
+<div class="modal fade" id="updateModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<form method="post" action="/Home/Handle/@ViewBag.tableName" class="m-2 p-3 bg-light">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="updateModalLabel">Update</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+					@foreach (string colName in ViewBag.ColNames)
+					{
+							<div class="form-group">
+								<label for=@colName class="col-form-label text-right">
+								@colName
+								</label>
+								<input type="text" class="form-control" id=@colName name=@colName>
+							</div>
+					}
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<input class="btn btn-info" type="submit" name="handle" value="Update" />
+			</div>
+		</div>
+		</form>
+	</div>
+</div>
+
+@* Delete modal *@
+<div class="modal fade" id="deleteModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<form method="post" action="/Home/Handle/@ViewBag.tableName" class="m-2 p-3 bg-light">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="deleteModalLabel">Delete</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+					@foreach (string colName in ViewBag.ColNames)
+					{
+						<div class="form-group">
+							<label for=@colName class="col-form-label text-right">
+								@colName
+							</label>
+							<input type="text" class="form-control" id=@colName name=@colName>
+						</div>
+					}
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+						<input class="btn btn-danger" type="submit" name="handle" value="Delete" />
+			</div>
+		</div>
+		</form>
+	</div>
+</div>
+
+<form method="post" action="/Home/Handle/@ViewBag.tableName" class="w-100">
+	<div class="input-group mb-3">
+			<textarea class="form-control" id="queryStr" name="queryStr"></textarea>
+			<div class="input-group-append">
+				<button class="btn btn-outline-secondary" type="submit" value="Query" name="handle">
+					Run query
+				</button>
+			</div>
+	</div>
+	</form>
+
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			@{
+				foreach (string colName in ViewBag.ColNames)
+				{
+									<td>@colName</td>
+				}
+			}
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var row in ViewBag.Data)
+		{
+				<tr>
+				@foreach (var name in ViewBag.ColNames)
+				{
+							<td>@row[name]</td>
+				}
+				</tr>
+		}
+	</tbody>
+</table>

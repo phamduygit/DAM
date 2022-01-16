@@ -1,14 +1,37 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
-@model List<Customer>
+
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">DAM</h1>
+    <p>Database Access Management Framework</p>
 </div>
 
+<h4 class="display-6">Connect database</h4>
+<form method="post" action="/Home/Tables" class="m-2 p-3 bg-light">
+    <div class="form-group">
+        <label for="databaseType">Select database type:</label>
+        <select class="custom-select" name="databaseType">
+            <option selected value="mysql">MySQL</option>
+            <option value="postgresql">PostgreSQL</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="connectionString">Connection string (without password):</label>
+        <input class="form-control" type="text" name="connectionString" value="" 
+            required placeholder="Server=yourServer;Uid=yourUid;Pwd=;Database=yourDatabase;"
+        />
+    </div>
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <input class="form-control" type="password" name="password" value="" />
+    </div>
+    <div class="form-group">
+        <input class="btn btn-primary" type="submit" value="Connect" />
+    </div>
+</form>
 
-<h2>Person</h2>
+@*<h2>Person</h2>
 
 <table class="table table-bordered">
     <thead>
@@ -35,4 +58,4 @@
 
         }
     </tbody>
-</table>
+</table>*@

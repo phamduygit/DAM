@@ -2,7 +2,6 @@ using System;
 using MySql.Data.MySqlClient;
 using System.Collections.Generic;
 using System.Reflection;
-using DAM.Models;
 using System.Linq;
 namespace DAM.Models
 {
