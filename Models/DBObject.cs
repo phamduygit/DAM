@@ -6,7 +6,7 @@ namespace DAM.Models
     {
         protected static string tableName;
         protected static string primaryKey;
-        protected static List<string> collumnNames {get ; set;}
+        protected static List<string> collumnNames { get; set; }
         public void setTableName(string _tableName)
         {
             tableName = _tableName;
@@ -26,19 +26,19 @@ namespace DAM.Models
 
         public bool save()
         {
-            DBManager db = DBManagerSingleton.GetInstance();
+            DBManager db = DBManager.GetInstance();
             return db.Insert(this);
         }
 
         public bool update()
         {
-            DBManager db = DBManagerSingleton.GetInstance();
+            DBManager db = DBManager.GetInstance();
             return db.Update(this);
         }
 
         public bool delete()
         {
-            DBManager db = DBManagerSingleton.GetInstance();
+            DBManager db = DBManager.GetInstance();
             return db.Delete(this);
         }
     }

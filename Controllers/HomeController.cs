@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -10,170 +10,176 @@ using System.ComponentModel;
 
 namespace DAM.Controllers
 {
-  public class HomeController : Controller
-  {
-    private readonly ILogger<HomeController> _logger;
-
-    public HomeController(ILogger<HomeController> logger)
+    public class HomeController : Controller
     {
-      _logger = logger;
-    }
-    public static object GetPropValue(object src, string propName)
-    {
-      return src.GetType().GetProperty(propName).GetValue(src, null);
-    }
-    public IActionResult Index()
-    {
-      
-      return View();
-    }
+        private readonly ILogger<HomeController> _logger;
 
-    public IActionResult Privacy()
-    {
-      return View();
-    }
-
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-      return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
-
-    [HttpPost]
-    public IActionResult Tables(DatabaseModel dbModel)
-    {
-      //Console.WriteLine(dbModel.connectionString + "Pwd=" + dbModel.password);
-      DBManager db = DBManagerSingleton.InitDBManager(dbModel.databaseType);
-      db.Connect("Server=localhost;Port=5432;Database=dam;UserId=postgres;Password=admin;");
-
-      List<string> tableList = new List<string>();
-      var tables = db.Query("SELECT table_name FROM information_schema.tables");
-
-      foreach (var table in tables)
-      {
-          foreach (KeyValuePair<string, dynamic>  item in table)
-          {
-          if (!item.Value.Contains("pg_"))
-          {
-            tableList.Add(item.Value);
-          }
-          }
-      }
-       
-      return View(tableList);
-    }
-
-    public IActionResult Handle()
-    {
-      string tableName = this.RouteData.Values["id"].ToString();
-
-      // Get class name from table name. Ex: customers => Customer
-      string className = Regex.Replace(tableName, @"(?<!\w)\w", m => m.Value.ToUpper()).Remove(tableName.Length - 1, 1);
-
-      // Get all column name of table
-      DBManager db = MySqLManager.GetInstance();
-      var cols = db.Query($"SELECT column_name FROM information_schema.columns WHERE table_name='{tableName}'");
-      Console.WriteLine(cols);
-      List<string> colNames = new List<string>();
-
-      foreach (var col in cols)
-      {
-        foreach (KeyValuePair<string, dynamic> colName  in col)
+        public HomeController(ILogger<HomeController> logger)
         {
-      
-            colNames.Add(colName.Value);
-            break;
-          
+            _logger = logger;
         }
-      }
-      
-      if (Request.HasFormContentType) {
-        Type t = Type.GetType("DAM.Models." + className);
-        object obj = Activator.CreateInstance(t);
-        var methodInfo = t.GetMethod("setTableName");
-        methodInfo.Invoke(obj, new object[]{tableName});
-
-        switch (Request.Form["handle"])
+        public static object GetPropValue(object src, string propName)
         {
-          case "Update": 
-            Console.WriteLine("Update");
+            return src.GetType().GetProperty(propName).GetValue(src, null);
+        }
+        public IActionResult Index()
+        {
 
-            foreach (var colName in colNames)
-            {  
-              TypeConverter typeConverter = TypeDescriptor.GetConverter(obj.GetType().GetProperty(colName).PropertyType);
+            return View();
+        }
 
-              if (Request.Form[colName] != "") {
-                obj.GetType().GetProperty(colName).SetValue(obj, typeConverter.ConvertFromString(Request.Form[colName]));
-              }
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        [HttpPost]
+        public IActionResult Tables(DatabaseModel dbModel)
+        {
+            //Console.WriteLine(dbModel.connectionString + "Pwd=" + dbModel.password);
+            DBManager db = DBManager.Init(dbModel.databaseType);
+            Console.WriteLine(dbModel.connectionString);
+            db.Connect(dbModel.connectionString);
+
+            List<string> tableList = new List<string>();
+            var query = "SHOW TABLES";
+            if(DBManager.dbType == "postgresql"){
+                query = "SELECT table_name from information_schema.tables where table_schema='public'";
+            }
+            var tables = db.Query(query);
+            foreach (var table in tables)
+            {
+                foreach (KeyValuePair<string, dynamic> item in table)
+                {
+                    tableList.Add(item.Value);
+                }
             }
 
-            // Insert with savve method
-            methodInfo = t.GetMethod("update");
-            methodInfo.Invoke(obj, null);
-            break;
-          case "Insert": 
-            Console.WriteLine("Insert");
-          
-            foreach (var colName in colNames)
-            {  
-              TypeConverter typeConverter = TypeDescriptor.GetConverter(obj.GetType().GetProperty(colName).PropertyType);
+            return View(tableList);
+        }
 
-              if (Request.Form[colName] != "") {
-                obj.GetType().GetProperty(colName).SetValue(obj, typeConverter.ConvertFromString(Request.Form[colName]));
-              }
+        public IActionResult Handle()
+        {
+            string tableName = this.RouteData.Values["id"].ToString();
+
+            // Get class name from table name. Ex: customers => Customer
+            string className = Regex.Replace(tableName, @"(?<!\w)\w", m => m.Value.ToUpper()).Remove(tableName.Length - 1, 1);
+
+            // Get all column name of table
+            DBManager db = MySqLManager.GetInstance();
+            var query = "DESCRIBE " + tableName;
+            if(DBManager.dbType=="postgresql"){
+                query = "SELECT column_name from information_schema.columns where table_name='" + tableName + "'";
+            }
+            var cols = db.Query(query);
+            List<string> colNames = new List<string>();
+
+            foreach (var col in cols)
+            {
+                foreach (KeyValuePair<string, dynamic> colName in col)
+                {
+                    colNames.Add(colName.Value);
+                    break;
+                }
             }
 
-            methodInfo = t.GetMethod("save");
-            methodInfo.Invoke(obj, null);
-            break;
-          case "Delete":
-            Console.WriteLine("Delete");
+            if (Request.HasFormContentType)
+            {
+                Type t = Type.GetType("DAM.Models." + className);
+                object obj = Activator.CreateInstance(t);
+                var methodInfo = t.GetMethod("setTableName");
+                methodInfo.Invoke(obj, new object[] { tableName });
 
-            foreach (var colName in colNames)
-            {  
-              TypeConverter typeConverter = TypeDescriptor.GetConverter(obj.GetType().GetProperty(colName).PropertyType);
+                switch (Request.Form["handle"])
+                {
+                    case "Update":
+                        Console.WriteLine("Update");
 
-              if (Request.Form[colName] != "") {
-                obj.GetType().GetProperty(colName).SetValue(obj, typeConverter.ConvertFromString(Request.Form[colName]));
-              }
+                        foreach (var colName in colNames)
+                        {
+                            TypeConverter typeConverter = TypeDescriptor.GetConverter(obj.GetType().GetProperty(colName).PropertyType);
+
+                            if (Request.Form[colName] != "")
+                            {
+                                obj.GetType().GetProperty(colName).SetValue(obj, typeConverter.ConvertFromString(Request.Form[colName]));
+                            }
+                        }
+
+                        // Insert with savve method
+                        methodInfo = t.GetMethod("update");
+                        methodInfo.Invoke(obj, null);
+                        break;
+                    case "Insert":
+                        Console.WriteLine("Insert");
+
+                        foreach (var colName in colNames)
+                        {
+                            TypeConverter typeConverter = TypeDescriptor.GetConverter(obj.GetType().GetProperty(colName).PropertyType);
+
+                            if (Request.Form[colName] != "")
+                            {
+                                obj.GetType().GetProperty(colName).SetValue(obj, typeConverter.ConvertFromString(Request.Form[colName]));
+                            }
+                        }
+
+                        methodInfo = t.GetMethod("save");
+                        methodInfo.Invoke(obj, null);
+                        break;
+                    case "Delete":
+                        Console.WriteLine("Delete");
+
+                        foreach (var colName in colNames)
+                        {
+                            TypeConverter typeConverter = TypeDescriptor.GetConverter(obj.GetType().GetProperty(colName).PropertyType);
+
+                            if (Request.Form[colName] != "")
+                            {
+                                obj.GetType().GetProperty(colName).SetValue(obj, typeConverter.ConvertFromString(Request.Form[colName]));
+                            }
+                        }
+
+                        methodInfo = t.GetMethod("delete");
+                        methodInfo.Invoke(obj, null);
+                        break;
+
+                    case "Query":
+                        Console.WriteLine("Query");
+                        var result = db.Query(Request.Form["queryStr"]);
+
+                        ViewBag.tableName = tableName;
+                        ViewBag.colNames = colNames;
+                        ViewBag.Data = result;
+
+                        return View("TableInfo", ViewBag);
+
+                    default:
+                        Console.WriteLine("Invalid");
+                        break;
+                }
             }
 
-            methodInfo = t.GetMethod("delete");
-            methodInfo.Invoke(obj, null);
-            break;
-
-          case "Query":
-            Console.WriteLine("Query");
-            var result = db.Query(Request.Form["queryStr"]);
+            var tableData = db.Query("SELECT * FROM " + tableName);
 
             ViewBag.tableName = tableName;
             ViewBag.colNames = colNames;
-            ViewBag.Data = result;
+            ViewBag.Data = tableData;
 
             return View("TableInfo", ViewBag);
-
-          default:   
-            Console.WriteLine("Invalid");
-            break;
         }
-      }
 
-      var tableData = db.Query("SELECT * FROM " + tableName);
+        public IActionResult CloseConnection()
+        {
+            DBManager db = MySqLManager.GetInstance();
+            db.Close();
 
-      ViewBag.tableName = tableName;
-      ViewBag.colNames = colNames;
-      ViewBag.Data = tableData;
-
-      return View("TableInfo", ViewBag);
+            return View("Index");
+        }
     }
-
-    public IActionResult CloseConnection()
-    {
-      DBManager db = MySqLManager.GetInstance();
-      db.Close();
-       
-      return View("Index");
-    }
-  }
 }
 
